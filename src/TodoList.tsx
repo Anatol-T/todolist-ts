@@ -6,36 +6,53 @@ type PropsType = {
   tasks: Array<TaskType>
   addTask: (title: string) => void
   deleteTask: (taskID: string) => void
+  changeTaskStatus: (id: string, isDone: boolean) => void
 }
 type FilterType = "All" | "Active" | "Completed"
 
-function TodoList({title, tasks, addTask, deleteTask}: PropsType) {
+function TodoList({title, tasks, addTask, deleteTask, changeTaskStatus}: PropsType) {
 
   const [filter, setFilter] = useState<FilterType>("All");
   const [inputTitle, setInputTitle] = useState<string>("")
+  const [error, setError] = useState<boolean>(false)
 
-  let filteredTasks = filter === "Active"
+  const filteredTasks = filter === "Active"
     ? tasks.filter(task => !task.isDone)
     : filter === "Completed"
       ? tasks.filter(task => task.isDone)
       : tasks;
+
   const onChangeFilter = (f: FilterType) => setFilter(f);
-  const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => setInputTitle(e.currentTarget.value);
+  const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    setInputTitle(e.currentTarget.value);
+  }
   const onKeyPressHandler = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.charCode === 13) addTaskHandler()
+    setError(false)
+    if (e.key === 'Enter') addTaskHandler()
   }
   const addTaskHandler = () => {
-    addTask(inputTitle);
-    setInputTitle("");
+    const trimmedTitle = inputTitle.trim();
+    if (trimmedTitle) {
+      addTask(trimmedTitle);
+      setInputTitle("");
+    } else {
+      setInputTitle("")
+      setError(true)
+    }
+  }
+
+  const getClasses = (f:FilterType) => {
+    return filter === f ? "active-filter": ""
   }
 
   const tasksJSX = filteredTasks.map(task => {
-    const onDeleteHandler = () => {
-      deleteTask(task.id)
+    const onDeleteHandler = () => {deleteTask(task.id)};
+    const changeStatus = (e:ChangeEvent<HTMLInputElement>) => {
+      changeTaskStatus(task.id, e.currentTarget.checked)
     }
     return (
-      <li key={task.id}>
-        <input type="checkbox" checked={task.isDone}/>
+      <li key={task.id} className={task.isDone ? "is-done" : ""}>
+        <input onChange={changeStatus} type="checkbox" checked={task.isDone}/>
         <span>{task.title}</span>
         <button onClick={onDeleteHandler}>X</button>
       </li>
@@ -47,24 +64,24 @@ function TodoList({title, tasks, addTask, deleteTask}: PropsType) {
     <div>
       <input value={inputTitle}
              onChange={onChangeHandler}
-             onKeyPress={onKeyPressHandler}/>
+             onKeyPress={onKeyPressHandler}
+             className={error ? "error": ""}
+      />
       <button onClick={addTaskHandler}>+</button>
+      {error && <div className="error-message">Title is required</div>}
     </div>
     <ul>
       {tasksJSX}
     </ul>
     <div>
-      <button onClick={() => {
-        onChangeFilter("All")
-      }}>All
+      <button className={getClasses("All")}
+              onClick={() => {onChangeFilter("All")}}>All
       </button>
-      <button onClick={() => {
-        onChangeFilter("Active")
-      }}>Active
+      <button className={getClasses("Active")}
+              onClick={() => {onChangeFilter("Active")}}>Active
       </button>
-      <button onClick={() => {
-        onChangeFilter("Completed")
-      }}>Completed
+      <button className={getClasses("Completed")}
+              onClick={() => {onChangeFilter("Completed")}}>Completed
       </button>
     </div>
   </div>
