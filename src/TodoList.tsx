@@ -3,14 +3,16 @@ import {TaskType} from "./App";
 
 type PropsType = {
   title: string,
+  todolistID: string
   tasks: Array<TaskType>
-  addTask: (title: string) => void
-  deleteTask: (taskID: string) => void
-  changeTaskStatus: (id: string, isDone: boolean) => void
+  deleteTodolist: (todolistID: string) => void
+  addTask: (todolistID: string, title: string) => void
+  deleteTask: (todolistID: string, taskID: string) => void
+  changeTaskStatus: (todolistID: string, taskID: string, isDone: boolean) => void
 }
 type FilterType = "All" | "Active" | "Completed"
 
-function TodoList({title, tasks, addTask, deleteTask, changeTaskStatus}: PropsType) {
+function TodoList({title, todolistID, tasks, addTask, deleteTodolist, deleteTask, changeTaskStatus}: PropsType) {
 
   const [filter, setFilter] = useState<FilterType>("All");
   const [inputTitle, setInputTitle] = useState<string>("")
@@ -33,7 +35,7 @@ function TodoList({title, tasks, addTask, deleteTask, changeTaskStatus}: PropsTy
   const addTaskHandler = () => {
     const trimmedTitle = inputTitle.trim();
     if (trimmedTitle) {
-      addTask(trimmedTitle);
+      addTask(todolistID, trimmedTitle);
       setInputTitle("");
     } else {
       setInputTitle("")
@@ -41,14 +43,18 @@ function TodoList({title, tasks, addTask, deleteTask, changeTaskStatus}: PropsTy
     }
   }
 
+  const deleteTodolistHandler = () => {
+    deleteTodolist(todolistID)
+  }
+
   const getClasses = (f:FilterType) => {
     return filter === f ? "active-filter": ""
   }
 
   const tasksJSX = filteredTasks.map(task => {
-    const onDeleteHandler = () => {deleteTask(task.id)};
+    const onDeleteHandler = () => {deleteTask(todolistID, task.id)};
     const changeStatus = (e:ChangeEvent<HTMLInputElement>) => {
-      changeTaskStatus(task.id, e.currentTarget.checked)
+      changeTaskStatus(todolistID, task.id, e.currentTarget.checked)
     }
     return (
       <li key={task.id} className={task.isDone ? "is-done" : ""}>
@@ -60,7 +66,9 @@ function TodoList({title, tasks, addTask, deleteTask, changeTaskStatus}: PropsTy
   })
 
   return <div>
-    <h3>{title}</h3>
+    <h3>{title}
+      <button onClick={deleteTodolistHandler}>X</button></h3>
+
     <div>
       <input value={inputTitle}
              onChange={onChangeHandler}
