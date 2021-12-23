@@ -1,4 +1,5 @@
 import React, {ChangeEvent, useState} from 'react';
+import {Tooltip} from "@mui/material";
 
 type PropsType = {
   title: string
@@ -23,7 +24,9 @@ export function EditableSpan(props: PropsType) {
 
   return (
     editMode
-      ? <input value={title} autoFocus onChange={onChangeHandler} onBlur={activateViewMode}/>
-      : <span onDoubleClick={activateEditMode}>{props.title}</span>
+      ? <input value={title} autoFocus onChange={onChangeHandler} onBlur={activateViewMode} style={{width: "130px"}}/>
+      : <Tooltip title="Double click to change" placement="top-end">
+        <span onDoubleClick={activateEditMode}>{props.title}</span>
+      </Tooltip>
   )
 }
