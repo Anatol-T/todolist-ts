@@ -6,7 +6,9 @@ type PropsType = {
   addItem: (text: string)=> void
 }
 
-export function AddItemForm({addItem}:PropsType) {
+export const AddItemForm = React.memo( function ({addItem}:PropsType) {
+  console.log('AddItemForm called')
+
   const [inputTitle, setInputTitle] = useState<string>("")
   const [error, setError] = useState<boolean>(false)
 
@@ -14,7 +16,7 @@ export function AddItemForm({addItem}:PropsType) {
     setInputTitle(e.currentTarget.value);
   }
   const onKeyPressHandler = (e: KeyboardEvent<HTMLInputElement>) => {
-    setError(false)
+    error && setError(false)
     if (e.key === 'Enter') sendTextHandler()
   }
   const sendTextHandler = () => {
@@ -50,4 +52,4 @@ export function AddItemForm({addItem}:PropsType) {
       {/*{error && <div className="error-message">Title is required</div>}*/}
     </div>
   )
-}
+})

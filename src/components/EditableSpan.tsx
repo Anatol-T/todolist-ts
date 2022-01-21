@@ -6,7 +6,8 @@ type PropsType = {
   changeCallback: (newTitle: string) => void
 }
 
-export function EditableSpan(props: PropsType) {
+export const EditableSpan = React.memo( function (props: PropsType) {
+  console.log("EditableSpan called")
   const [editMode, setEditMode] = useState(false)
   const [title, setTitle] = useState("")
 
@@ -29,4 +30,4 @@ export function EditableSpan(props: PropsType) {
         <span onDoubleClick={activateEditMode}>{props.title}</span>
       </Tooltip>
   )
-}
+})

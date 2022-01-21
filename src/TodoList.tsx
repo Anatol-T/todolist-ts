@@ -1,9 +1,10 @@
-import React, {ChangeEvent, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {TaskType} from "./App";
 import {AddItemForm} from "./components/AddItemForm";
 import {EditableSpan} from "./components/EditableSpan";
-import {Button, ButtonGroup, Checkbox, IconButton} from "@mui/material";
+import {Button, ButtonGroup, IconButton} from "@mui/material";
 import {DeleteForeverOutlined} from "@mui/icons-material";
+import {Task} from "./task";
 
 type PropsType = {
   title: string,
@@ -18,12 +19,12 @@ type PropsType = {
 }
 type FilterType = "All" | "Active" | "Completed"
 
-function TodoList(
+export const TodoList = React.memo(function (
   {
     title, todolistID, tasks, deleteTodolist, changeTodolistTitle, addTask,
     deleteTask, changeTaskStatus, changeTaskTitle
   }: PropsType) {
-
+  console.log("Todolist called")
   const [filter, setFilter] = useState<FilterType>("All");
 
   const filteredTasks = filter === "Active"
@@ -37,38 +38,24 @@ function TodoList(
   const deleteTodolistHandler = () => {
     deleteTodolist(todolistID)
   }
-  const changeTodolistTitleHandler = (newTitle: string)=> {
+  const changeTodolistTitleHandler = useCallback((newTitle: string)=> {
     changeTodolistTitle(todolistID,newTitle)
-  }
-  const addTaskHandler = (text: string) => {
+  }, [changeTodolistTitle, todolistID])
+  const addTaskHandler = useCallback((text: string) => {
     addTask(todolistID, text);
-  }
+  }, [todolistID, addTask])
 
-  // const getClasses = (f: FilterType) => {
-  //   return filter === f ? "active-filter" : ""
-  // }
 
   const tasksJSX = filteredTasks.map(task => {
-    const onDeleteHandler = () => {
-      deleteTask(todolistID, task.id)
-    };
-    const changeStatus = (e: ChangeEvent<HTMLInputElement>) => {
-      changeTaskStatus(todolistID, task.id, e.currentTarget.checked)
-    }
-    const changeTitle = (newTitle: string) => {
-      changeTaskTitle(todolistID, task.id, newTitle)
-    }
     return (
-      <li key={task.id} className={task.isDone ? "is-done" : ""}>
-        <Checkbox onChange={changeStatus} checked={task.isDone} size="small"/>
-        {/*<input onChange={changeStatus} type="checkbox" checked={task.isDone}/>*/}
-        <EditableSpan title={task.title} changeCallback={changeTitle}/>
-        <IconButton onClick={onDeleteHandler} size="small">
-          < DeleteForeverOutlined />
-        </IconButton>
-        {/*<button onClick={onDeleteHandler}>X</button>*/}
-      </li>
-    )
+    <Task
+      key={task.id}
+      todolistID={todolistID}
+      task={task}
+      deleteTask={deleteTask}
+      changeTaskStatus={changeTaskStatus}
+      changeTaskTitle={changeTaskTitle}/>
+  )
   })
 
   return <div>
@@ -99,7 +86,4 @@ function TodoList(
       </ButtonGroup>
     </div>
   </div>
-
-}
-
-export default TodoList;
+})
